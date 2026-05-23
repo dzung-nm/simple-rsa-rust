@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-rand = "0.10.1"
-num-bigint = "0.4.6"
+rand = { version = "0.8", features = ["std_rng"] }
+num-bigint = { version = "0.4.6", features = ["rand"] }
+num-traits = "0.2.19"
+num-integer = "0.1.46"

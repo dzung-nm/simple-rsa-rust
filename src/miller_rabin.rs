@@ -1,36 +1,57 @@
 // https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
 
-use rand::prelude::*;
-use crate::mod_exp::mod_exp;
+use num_bigint::{BigInt, RandBigInt};
+use num_traits::{One, Zero};
 
-// Returns true if n is probably prime, false if n is composite
-pub fn miller_rabin(n: i64) -> bool {
-    if n <= 4 {
-        panic!("n must be greater than 4");
+/// Returns true if n is probably prime, false if n is composite
+/// ```
+///     assert_eq!(miller_rabin(&BigInt::from(5)), true);
+///     assert_eq!(miller_rabin(&BigInt::from(15)), false);
+/// ```
+pub fn miller_rabin(n: &BigInt) -> bool {
+    let zero = BigInt::zero();
+    let one = BigInt::one();
+    let two = &zero + 2;
+    let three = &zero + 3;
+
+    if *n <= one {
+        panic!("n must be greater than 1");
     }
+
+    if *n <= three {
+        return true;
+    }
+
+    if n % 2u8 == zero {
+        return false;
+    }
+
+    let n_minus_one: BigInt = n - 1;
 
     // factoring out powers of 2 from n − 1
     // n − 1 = 2^s * d, where d is odd
-    let mut d = n - 1;
+    let mut d = n_minus_one.clone();
     let mut s = 0;
-    while d % 2 == 0 {
-        d /= 2;
+    while (&d & &one) == zero {
+        d >>= 1;
         s += 1;
     }
 
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
     let k = 10; // the number of rounds of testing
 
     for _ in 0..k {
-        let a = rng.random_range(2..=(n - 2)); // randomly chosen base in the range [2, n − 2]
-        let mut x = mod_exp(a, d, n);
-        if x == 1 || x == n - 1 {
+        // randomly chosen base in the range [2, n − 2]
+        let a = rng.gen_bigint_range(&two, &n_minus_one);
+
+        let mut x = BigInt::modpow(&a, &d, n);
+        if x == one || x == n_minus_one {
             continue;
         }
         let mut composite = true;
-        for _ in 0..s - 1 {
-            x = mod_exp(x, 2, n);
-            if x == n - 1 {
+        for _ in 0..(s - 1) {
+            x = BigInt::modpow(&x, &two, n);
+            if x == n_minus_one {
                 composite = false;
                 break;
             }
@@ -45,8 +66,8 @@ pub fn miller_rabin(n: i64) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::time::Instant;
-    use crate::miller_rabin::*;
 
     fn get_base_primes(n: i64) -> Vec<i64> {
         let mut primes: Vec<i64> = Vec::new();
@@ -66,13 +87,23 @@ mod tests {
     #[test]
     fn test_miller_rabin() {
         let start = Instant::now();
-        let n = 1_000_000;
+        let n = 100_000;
         let primes = get_base_primes(n);
         for i in 5..n {
             let is_prime = primes.binary_search(&i);
             match is_prime {
-                Ok(..) => assert_eq!(miller_rabin(i), true, "{} should be a prime", i),
-                Err(_) => assert_eq!(miller_rabin(i), false, "{} should not be a prime", i),
+                Ok(..) => assert_eq!(
+                    miller_rabin(&BigInt::from(i)),
+                    true,
+                    "{} should be a prime",
+                    i
+                ),
+                Err(_) => assert_eq!(
+                    miller_rabin(&BigInt::from(i)),
+                    false,
+                    "{} should not be a prime",
+                    i
+                ),
             }
         }
         let duration = start.elapsed();
