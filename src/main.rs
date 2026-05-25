@@ -1,13 +1,22 @@
-use simple_rsa_rust::rsa::{decrypt, encrypt, new_keys};
+use simple_rsa_rust::rsa::*;
 
 fn main() {
     let bits = 512;
     let (public_key, private_key) = new_keys(bits);
-    let messages: [i64; 10] = std::array::from_fn(|i| i as i64 + 1);
+    let messages = vec![
+        b"Hello, RSA!".to_vec(),
+        b"Rust is great for cryptography.".to_vec(),
+        b"Simple RSA implementation.".to_vec(),
+    ];
     for message in messages {
-        let ciphertext = encrypt(message, &public_key);
-        let decrypted_message = decrypt(&ciphertext, &private_key);
-        assert_eq!(message, decrypted_message);
-        println!("{:?} -> {:?}", message, ciphertext);
+        let encrypted = encrypt(&message, &public_key);
+        let decrypted = decrypt(&encrypted, &private_key);
+        assert_eq!(message.to_vec(), decrypted);
+        println!("Original message: {:?}", String::from_utf8_lossy(&message));
+        println!("Encrypted message: {}", encrypted);
+        println!(
+            "Decrypted message: {:?}",
+            String::from_utf8_lossy(&decrypted)
+        );
     }
 }

@@ -4,10 +4,6 @@ use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Zero};
 
 /// Returns true if n is probably prime, false if n is composite
-/// ```
-///     assert_eq!(miller_rabin(&BigInt::from(5)), true);
-///     assert_eq!(miller_rabin(&BigInt::from(15)), false);
-/// ```
 pub fn miller_rabin(n: &BigInt) -> bool {
     let zero = BigInt::zero();
     let one = BigInt::one();

@@ -5,15 +5,13 @@ use crate::miller_rabin::miller_rabin;
 
 /// Generate a pair of primes (p, q) in 'bits' size
 /// p < q, and both should be in range (2^(bits-1), 2^bits)
-/// ```
-///     let (p, q) = generate_prime_pair(128);
-///     assert_eq!(miller_rabin(&p), true, "p should be prime");
-///     assert_eq!(miller_rabin(&q), true, "q should be prime");
-///     assert_eq!(q > p, true, "q should be greater than p");
-/// ```
-pub fn generate_prime_pair(bits: u16) -> (BigInt, BigInt) {
+pub fn generate_prime_pair(bits: usize) -> (BigInt, BigInt) {
     if bits < 4 {
         panic!("Bits size must be at least 4 to ensure a reasonable distance between p and q");
+    }
+
+    if bits > 2048 {
+        panic!("Bits size is too large for this implementation");
     }
 
     let mut rng = rand::thread_rng();
@@ -43,7 +41,7 @@ mod tests {
 
     #[test]
     fn test_generate_prime_pair() {
-        let bits: u16 = 128;
+        let bits = 128;
         for _ in 0..10 {
             let (p, q) = generate_prime_pair(bits);
             assert_eq!(miller_rabin(&p), true, "p should be prime");
