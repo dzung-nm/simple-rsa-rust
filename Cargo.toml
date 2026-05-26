@@ -2,9 +2,14 @@
 name = "simple-rsa-rust"
 version = "0.1.0"
 edition = "2024"
+authors = ["Dzung Nguyen Mau"]
 
 [dependencies]
 rand = { version = "0.8", features = ["std_rng"] }
 num-bigint = { version = "0.4.6", features = ["rand"] }
 num-traits = "0.2.19"
 num-integer = "0.1.46"
+
+[dev-dependencies]
+ctor = "1.0.6"
+
