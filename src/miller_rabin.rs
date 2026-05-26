@@ -33,7 +33,7 @@ pub fn miller_rabin_test(n: &BigInt) -> bool {
     }
 
     let mut rng = rand::thread_rng();
-    let k = 10; // the number of rounds of testing
+    let k = 20; // the number of rounds of testing
 
     for _ in 0..k {
         // randomly chosen base in the range [2, n − 2]
