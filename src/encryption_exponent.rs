@@ -40,4 +40,10 @@ mod tests {
             BigInt::from(65539)
         );
     }
+
+    #[test]
+    #[should_panic(expected = "phi is too small!")]
+    fn test_too_small_panic() {
+        encryption_exponent(&BigInt::from(3));
+    }
 }

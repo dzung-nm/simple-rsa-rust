@@ -1,10 +1,9 @@
-// https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
-
 use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Zero};
 
 /// Returns true if n is probably prime, false if n is composite
-pub fn miller_rabin(n: &BigInt) -> bool {
+/// https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
+pub fn miller_rabin_test(n: &BigInt) -> bool {
     let zero = BigInt::zero();
     let one = BigInt::one();
     let two = &zero + 2;
@@ -81,7 +80,7 @@ mod tests {
     }
 
     #[test]
-    fn test_miller_rabin() {
+    fn test_miller_rabin_test() {
         let start = Instant::now();
         let n = 100_000;
         let primes = get_base_primes(n);
@@ -89,13 +88,13 @@ mod tests {
             let is_prime = primes.binary_search(&i);
             match is_prime {
                 Ok(..) => assert_eq!(
-                    miller_rabin(&BigInt::from(i)),
+                    miller_rabin_test(&BigInt::from(i)),
                     true,
                     "{} should be a prime",
                     i
                 ),
                 Err(_) => assert_eq!(
-                    miller_rabin(&BigInt::from(i)),
+                    miller_rabin_test(&BigInt::from(i)),
                     false,
                     "{} should not be a prime",
                     i
@@ -104,5 +103,11 @@ mod tests {
         }
         let duration = start.elapsed();
         println!("Total execution time: {:?}", duration);
+    }
+
+    #[test]
+    #[should_panic = "n must be greater than 1"]
+    fn test_n_invalid_panic() {
+        miller_rabin_test(&BigInt::from(1));
     }
 }

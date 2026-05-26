@@ -38,9 +38,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic = "Message is too long for the given key size"]
     fn test_panic() {
-        let padded = pkcs1_padding(b"Hello, World!", 0);
+        let padded = pkcs1_padding(b"Hello, World!", 16);
         let _ = padded;
     }
 }
