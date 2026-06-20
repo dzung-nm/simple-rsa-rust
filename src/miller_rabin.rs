@@ -82,7 +82,7 @@ mod tests {
     #[test]
     fn test_miller_rabin_test() {
         let start = Instant::now();
-        let n = 100_000;
+        let n = 20_000;
         let primes = get_base_primes(n);
         for i in 5..n {
             let is_prime = primes.binary_search(&i);

@@ -1,7 +1,7 @@
 use simple_rsa_rust::rsa::{decrypt, encrypt, new_keys};
 
 fn main() {
-    let bits = 1024;
+    let bits = 2048;
     let (public_key, private_key) = new_keys(bits);
     let messages = vec![
         b"Hello, RSA!".to_vec(),

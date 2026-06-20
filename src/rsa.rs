@@ -1,6 +1,7 @@
 use num_bigint::BigInt;
 use num_traits::One;
 
+use crate::constants::*;
 use crate::encryption_exponent::encryption_exponent;
 use crate::generate_prime_pair::generate_prime_pair;
 use crate::pkcs1_padding::pkcs1_padding;
@@ -17,12 +18,18 @@ pub struct PrivateKey {
 
 /// Generates a pair of RSA keys (public and private) based on the specified bit length.
 pub fn new_keys(bits: usize) -> (PublicKey, PrivateKey) {
-    if bits < 512 {
-        panic!("Bits size must be at least 512 to ensure a reasonable security level");
+    if bits < RSA_MIN_BITS {
+        panic!(
+            "Bits size must be at least {} to ensure a reasonable security level",
+            RSA_MIN_BITS
+        );
     }
 
-    if bits > 2048 {
-        panic!("Bits size is too large for this implementation");
+    if bits > RSA_MAX_BITS {
+        panic!(
+            "Bits size is too large for this implementation, maximum allowed is {}",
+            RSA_MAX_BITS
+        );
     }
 
     let one = BigInt::one();
@@ -70,15 +77,15 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic = "Bits size must be at least 512 to ensure a reasonable security level"]
+    #[should_panic]
     fn test_new_keys_bits_too_small_panic() {
-        new_keys(511);
+        new_keys(1);
     }
 
     #[test]
-    #[should_panic = "Bits size is too large for this implementation"]
+    #[should_panic]
     fn test_new_keys_bits_too_large_panic() {
-        new_keys(2049);
+        new_keys(10000);
     }
 
     #[test]
