@@ -1,11 +1,15 @@
-use simple_rsa_rust::rsa::new_keys;
+use simple_rsa_rust::*;
 
 fn main() {
-    println!("=== RSA Key Generation Benchmark ===\n");
-
     let k = 10; // number of rounds
-    let bits = 2048;
+    let bits = RSA_MAX_BITS;
     let mut total_time = 0.0;
+
+    println!("=== RSA Key Generation Benchmark ===\n");
+    println!(
+        "Generating RSA keys with {} bits, repeated {} times...\n",
+        bits, k
+    );
 
     for i in 1..=k {
         let start = std::time::Instant::now();

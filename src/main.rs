@@ -1,4 +1,4 @@
-use simple_rsa_rust::rsa::{decrypt, encrypt, new_keys};
+use simple_rsa_rust::{decrypt, encrypt, new_keys};
 
 fn main() {
     let bits = 2048;

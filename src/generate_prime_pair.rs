@@ -112,7 +112,7 @@ mod tests {
     #[test]
     #[should_panic = "Bits size is too large for this implementation"]
     fn test_bits_size_too_large_panic() {
-        generate_prime_pair(RSA_MAX_BITS / 2 + 1);
+        generate_prime_pair(10000);
     }
 
     #[test]

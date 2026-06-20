@@ -3,8 +3,10 @@ mod encryption_exponent;
 mod generate_prime_pair;
 mod miller_rabin;
 mod pkcs1_padding;
+mod rsa;
 
-pub mod rsa;
+pub use constants::*;
+pub use rsa::{decrypt, encrypt, new_keys};
 
 // Suppress panic output for all tests
 #[cfg(test)]
