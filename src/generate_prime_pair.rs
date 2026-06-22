@@ -52,9 +52,10 @@ fn find_prime_with_wheel(mut p: BigInt) -> BigInt {
 
 /// Generate a pair of primes (p, q) in 'bits' size
 /// p < q, and both should be in range (2^(bits-1), 2^bits)
+/// n = p * q should have a bit length of 2 * bits
 pub fn generate_prime_pair(bits: usize) -> (BigInt, BigInt) {
-    if bits < 4 {
-        panic!("Bits size must be at least 4");
+    if bits < 8 {
+        panic!("Bits size must be at least 8");
     }
 
     if bits > RSA_MAX_BITS / 2 {
@@ -63,18 +64,24 @@ pub fn generate_prime_pair(bits: usize) -> (BigInt, BigInt) {
 
     let mut rng = rand::thread_rng();
 
-    let lower_bound = BigInt::one() << (bits - 1); // 2^(bits-1)
-    let midpoint = &lower_bound + (BigInt::one() << (bits - 2)); // 2^(bits-1) + 2^(bits-2)
-    // let upper_bound = BigInt::one() << bits; // 2^bits
-    let distance = BigInt::one() << (bits - 3); // 2^(bits-3)
+    let lower_bound = (BigInt::one() << (bits - 1)) + (BigInt::one() << (bits - 2));
+    let upper_bound = (BigInt::one() << bits) - BigInt::one();
 
-    let p_start = rng.gen_bigint_range(&lower_bound, &midpoint) | BigInt::one();
-    let p = find_prime_with_wheel(p_start);
+    loop {
+        let p_start = rng.gen_bigint_range(&lower_bound, &upper_bound) | BigInt::one();
+        let p = find_prime_with_wheel(p_start);
 
-    let q_start = &p + distance;
-    let q = find_prime_with_wheel(q_start);
+        let q_start = rng.gen_bigint_range(&lower_bound, &upper_bound) | BigInt::one();
+        let q = find_prime_with_wheel(q_start);
 
-    (p, q)
+        if p < q && q < upper_bound {
+            return (p, q);
+        }
+
+        if q < p && p < upper_bound {
+            return (q, p);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -84,7 +91,7 @@ mod tests {
 
     #[test]
     fn test_generate_prime_pair() {
-        let bits_sizes = [4, 8, 16, 32, 64, 128, 256, 512];
+        let bits_sizes = [8, 16, 32, 64, 128, 256, 512];
         for bits in bits_sizes {
             let start = Instant::now();
             let (p, q) = generate_prime_pair(bits);
@@ -92,7 +99,11 @@ mod tests {
 
             println!("--------------------------------------------------");
             println!("generate_prime_pair(bits={}) took {:?}", bits, duration);
-            println!("The bit length of n = p * q is {}", (&p * &q).bits());
+
+            let n_bits = (&p * &q).bits();
+            println!("The bit length of n = p * q is {}", n_bits);
+            assert_eq!(n_bits as usize, bits * 2);
+
             println!("Generated prime pair: p = {}, q = {}", p, q);
 
             assert_eq!(miller_rabin_test(&p), true, "p should be prime");
@@ -116,8 +127,8 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Bits size must be at least 4"]
+    #[should_panic = "Bits size must be at least 8"]
     fn test_bits_size_too_small_panic() {
-        generate_prime_pair(3);
+        generate_prime_pair(7);
     }
 }
