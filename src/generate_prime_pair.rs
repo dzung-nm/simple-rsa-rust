@@ -28,7 +28,7 @@ pub fn generate_prime_pair(bits: usize) -> (BigInt, BigInt) {
     loop {
         // on my machine 8 threads seems to be optimal
         // adding more threads seems not improve performance
-        let n_threads = 8;
+        let n_threads = PRIME_GENERATION_THREADS;
 
         let rand_numbers: Vec<BigInt> = (0..n_threads)
             .map(|_| rng.gen_bigint_range(&lower_bound, &upper_bound) | BigInt::one())

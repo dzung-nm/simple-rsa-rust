@@ -1,6 +1,8 @@
 use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Zero};
 
+use crate::constants::*;
+
 /// Returns true if n is probably prime, false if n is composite
 /// https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
 pub fn miller_rabin_test(n: &BigInt) -> bool {
@@ -33,9 +35,8 @@ pub fn miller_rabin_test(n: &BigInt) -> bool {
     }
 
     let mut rng = rand::thread_rng();
-    let k = 20; // the number of rounds of testing
 
-    for _ in 0..k {
+    for _ in 0..MILLER_RABIN_ROUNDS {
         // randomly chosen base in the range [2, n − 2]
         let a = rng.gen_bigint_range(&two, &n_minus_one);
 
