@@ -1,61 +1,11 @@
 use num_bigint::{BigInt, RandBigInt};
-use num_traits::{One, ToPrimitive};
+use num_traits::One;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crate::constants::*;
-use crate::miller_rabin::miller_rabin_test;
-
-fn find_prime_with_wheel(mut p: BigInt, stop_flag: Arc<AtomicBool>) -> Option<BigInt> {
-    let base_primes = [2, 3, 5];
-    let product: i64 = base_primes.iter().product();
-
-    // Generate numbers coprime to the base primes within the range [1, product]
-    // For [2, 3, 5], this yields: [1, 7, 11, 13, 17, 19, 23, 29]
-    let numbers: Vec<i64> = (1..product)
-        .filter(|&num| base_primes.iter().all(|&prime| num % prime != 0))
-        .collect();
-
-    // Pre-calculate the cyclic jump distances (gaps) between coprime numbers
-    // For [2, 3, 5], gaps will be: [6, 4, 2, 4, 2, 4, 6, 2]
-    let mut gaps = Vec::with_capacity(numbers.len());
-    for i in 0..numbers.len() {
-        let next_val = if i == numbers.len() - 1 {
-            numbers[0] + product // Wrap around to the first element of the next cycle
-        } else {
-            numbers[i + 1]
-        };
-        gaps.push(next_val - numbers[i]);
-    }
-
-    // Align the initial candidate 'p' to the nearest valid wheel position
-    let remainder = (&p % product).to_i64().unwrap();
-
-    let mut idx = numbers
-        .iter()
-        .position(|&num| num >= remainder)
-        .unwrap_or(0);
-
-    if numbers[idx] < remainder {
-        p += BigInt::from((product - remainder) + numbers[0]);
-        idx = 0;
-    } else if numbers[idx] > remainder {
-        p += BigInt::from(numbers[idx] - remainder);
-    }
-
-    while !miller_rabin_test(&p) {
-        if stop_flag.load(Ordering::Relaxed) {
-            return None;
-        }
-
-        let step = gaps[idx];
-        p += step;
-        idx = (idx + 1) % gaps.len();
-    }
-
-    Some(p)
-}
+use crate::find_prime_with_wheel::find_prime_with_wheel;
 
 /// Generate a pair of primes (p, q) in 'bits' size, satisfying the following conditions:
 ///  *) p < q, and both should be in range (2^(bits-1), 2^bits)
@@ -99,7 +49,7 @@ pub fn generate_prime_pair(bits: usize) -> (BigInt, BigInt) {
             let found_count = Arc::clone(&found_count);
 
             let handle = thread::spawn(move || {
-                if let Some(prime) = find_prime_with_wheel(start, stop_flag.clone()) {
+                if let Some(prime) = find_prime_with_wheel(&start, stop_flag.clone()) {
                     let mut res = results.lock().unwrap();
                     res.push(prime);
                     drop(res);
@@ -137,8 +87,10 @@ pub fn generate_prime_pair(bits: usize) -> (BigInt, BigInt) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::time::Instant;
+
+    use super::*;
+    use crate::miller_rabin::miller_rabin_test;
 
     #[test]
     fn test_generate_prime_pair() {

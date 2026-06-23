@@ -1,5 +1,6 @@
 mod constants;
 mod encryption_exponent;
+mod find_prime_with_wheel;
 mod generate_prime_pair;
 mod miller_rabin;
 mod pkcs1_padding;
